@@ -1843,7 +1843,7 @@ int do_command(int command, int repcount, boolean firsttime, struct nh_cmd_arg *
 	/* if we're hallucinating, make sure to flush screen data when not in
 	   zero-time, or we'll possibly end up saving display rng data */
 	if (!program_state.in_zero_time_command && Hallucination)
-	    vision_recalc(0);
+	    doredraw();
 
 	/* NULL arg is synonymous to CMD_ARG_NONE */
 	if (!arg)
