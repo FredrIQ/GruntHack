@@ -428,11 +428,11 @@ static void flip_drawbridge_vertical(struct rm *loc)
 
 #define FlipX(val) do {                                 \
         if ((flp & 2) && isok(val, miny))               \
-            val = ((maxx - (val)) - minx);              \
+            val = ((maxx - (val)) + minx);              \
     } while (0)
 #define FlipY(val) do {                                 \
         if ((flp & 1) && isok(minx, val))               \
-            val = ((maxy - (val)) - miny);              \
+            val = ((maxy - (val)) + miny);              \
     } while (0)
 #define FlipXY(x, y) do {                       \
         FlipX(x);                               \
