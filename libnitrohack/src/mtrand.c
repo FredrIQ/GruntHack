@@ -41,7 +41,7 @@ void mt_srand(unsigned int seed)
     left = 0;
     *s++ = x;
     for (j = N; j > 1; --j)
-	 *s++ = (x*=69069U) & 0xFFFFFFFF;
+        *s++ = (x*=69069U) & 0xFFFFFFFF;
 }
 
 
@@ -53,20 +53,20 @@ static unsigned int mt_reload(void)
     left = N-1;
     next = state+1;
     dpos = 0;
-    
+
     s0 = state[0];
     s1 = state[1];
     for (j = N-M+1; j > 1; --j) {
-	*p0++ = *pM++ ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0);
-	s0 = s1;
-	s1 = *p2++;
+        *p0++ = *pM++ ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0);
+        s0 = s1;
+        s1 = *p2++;
     }
 
     pM = state;
     for (j=M; j > 1; --j) {
-	*p0++ = *pM++ ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0);
-	s0 = s1;
-	s1 = *p2++;
+        *p0++ = *pM++ ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0);
+        s0 = s1;
+        s1 = *p2++;
     }
 
     s1 = state[0];
@@ -96,7 +96,7 @@ unsigned int mt_random(void)
 unsigned int mt_nextstate(void)
 {
     if (!left)
-	return 0;
+        return 0;
     return *next;
 }
 
@@ -107,7 +107,7 @@ void save_mt_state(struct memfile *mf)
 
     mtag(mf, 0, MTAG_RNGSTATE);
     for (i = 0; i < N+1; i++)
-	mwrite32(mf, state[i]);
+        mwrite32(mf, state[i]);
     mwrite32(mf, pos);
     mwrite32(mf, left);
 }
@@ -117,7 +117,7 @@ void restore_mt_state(struct memfile *mf)
 {
     unsigned int i, pos;
     for (i = 0; i < N+1; i++)
-	state[i] = mread32(mf);
+        state[i] = mread32(mf);
     pos = mread32(mf);
     left = mread32(mf);
     next = &state[pos];
@@ -142,7 +142,6 @@ int display_rng(int x)
      * This gives the lcg a full period according to Hull & Dobell.
      */
     lcg_val = ((lcg_val * 7 + 65537) % 4294967291u) ^ num;
-    
+
     return lcg_val % x;
 }
-

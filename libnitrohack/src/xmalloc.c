@@ -7,12 +7,12 @@ void *xmalloc(int size);
 void xmalloc_cleanup(void);
 
 /* malloc wrapper functions for "external" memory allocations
- * 
+ *
  * The idea is to avoid a transfer of responsibility for freeing memory to to
  * callers of libnitrohack api functions. This would require clearly stating
  * which pointers refer to heap-allocated memory (requiring free) and which are
  * statically allocated. This seems undesirable.
- * 
+ *
  * Instead a lifetime rule is introduced: returned memory is only valid until
  * the next move. After that memory is automatically freed.
  */
@@ -28,21 +28,21 @@ void *xmalloc(int size)
 {
     void *mem;
     struct xmalloc_block *b;
-    
+
     mem = malloc(size);
     if (!mem)
-	return NULL;
-    
+        return NULL;
+
     b = malloc(sizeof(struct xmalloc_block));
     if (!b) {
-	free(mem);
-	return NULL;
+        free(mem);
+        return NULL;
     }
-       
+
     b->mem = mem;
     b->next = xm_blocklist;
     xm_blocklist = b;
-    
+
     return mem;
 }
 
@@ -51,10 +51,10 @@ void xmalloc_cleanup(void)
 {
     struct xmalloc_block *b;
     while (xm_blocklist) {
-	b = xm_blocklist;
-	xm_blocklist = xm_blocklist->next;
-	
-	free(b->mem);
-	free(b);
+        b = xm_blocklist;
+        xm_blocklist = xm_blocklist->next;
+
+        free(b->mem);
+        free(b);
     }
 }

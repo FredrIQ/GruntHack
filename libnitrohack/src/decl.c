@@ -11,19 +11,19 @@ int bases[MAXOCLASSES];
 int multi;
 char multi_txt[BUFSZ];
 int occtime;
-int delay_start;		/* used purely for delay_msg */
+int delay_start;        /* used purely for delay_msg */
 
-int x_maze_max, y_maze_max;	/* initialized in main, used in mkmaze.c */
-int otg_temp;			/* used by object_to_glyph() [otg] */
+int x_maze_max, y_maze_max; /* initialized in main, used in mkmaze.c */
+int otg_temp;           /* used by object_to_glyph() [otg] */
 
 /*
- *	The following structure will be initialized at startup time with
- *	the level numbers of some "important" things in the game.
+ *  The following structure will be initialized at startup time with
+ *  the level numbers of some "important" things in the game.
  */
 struct dgn_topology dungeon_topology;
 
 #include "quest.h"
-struct q_score	quest_status;
+struct q_score  quest_status;
 
 int smeq[MAXNROFROOMS+1];
 
@@ -34,8 +34,8 @@ const char *delayed_killer;
 int done_money;
 char killer_buf[BUFSZ];
 const char *nomovemsg;
-const char nul[40];			/* contains zeros */
-char plname[PL_NSIZ];			/* player name */
+const char nul[40];         /* contains zeros */
+char plname[PL_NSIZ];           /* player name */
 char pl_character[PL_CSIZ];
 char pl_race;
 
@@ -55,7 +55,7 @@ const char ynaqchars[] = "ynaq";
 const char disclosure_options[] = "iavgc";
 
 #if defined(WIN32)
-char hackdir[PATHLEN];		/* where rumors, help, record are */
+char hackdir[PATHLEN];      /* where rumors, help, record are */
 #endif
 
 
@@ -65,7 +65,7 @@ const schar xdir[11] = { -1,-1, 0, 1, 1, 1, 0,-1, 0, 0, 0 };
 const schar ydir[11] = {  0,-1,-1,-1, 0, 1, 1, 1, 0, 0, 0 };
 const schar zdir[11] = {  0, 0, 0, 0, 0, 0, 0, 0,-1, 1, 0 };
 
-schar tbx, tby;	/* mthrowu: target */
+schar tbx, tby; /* mthrowu: target */
 
 /* for xname handling of multiple shot missile volleys:
    number of shots, index of current one, validity check, shoot vs throw */
@@ -78,23 +78,23 @@ int stetho_last_used_move, stetho_last_used_movement;
 boolean alchemy_init_done;
 
 int branch_id;
-dungeon dungeons[MAXDUNGEON];	/* ini'ed by init_dungeon() */
+dungeon dungeons[MAXDUNGEON];   /* ini'ed by init_dungeon() */
 s_level *sp_levchn;
 coord inv_pos; /* vibrating square position */
 
 boolean in_mklev;
-boolean stoned;	/* done to monsters hit by 'c' */
+boolean stoned; /* done to monsters hit by 'c' */
 boolean unweapon;
 boolean mrg_to_wielded;
-			 /* weapon picked is merged with wielded one */
-struct obj *current_wand;	/* wand currently zapped/applied */
+/* weapon picked is merged with wielded one */
+struct obj *current_wand;   /* wand currently zapped/applied */
 
 boolean in_steed_dismounting;
 
 coord bhitpos;
 
 struct level *levels[MAXLINFO];
-struct level *level;		/* level map */
+struct level *level;        /* level map */
 
 struct monst youmonst;
 struct permonst upermonst;
@@ -103,25 +103,25 @@ struct instance_flags iflags;
 struct you u;
 
 struct obj *invent,
-	*uwep, *uarm,
-	*uswapwep,
-	*uquiver, /* quiver */
-	*uarmu, /* under-wear, so to speak */
-	*uskin, /* dragon armor, if a dragon */
-	*uarmc, *uarmh,
-	*uarms, *uarmg,
-	*uarmf, *uamul,
-	*uright,
-	*uleft,
-	*ublindf,
-	*uchain,
-	*uball;
-int lastinvnr;	/* 0 ... 51 */
+    *uwep, *uarm,
+    *uswapwep,
+    *uquiver, /* quiver */
+    *uarmu, /* under-wear, so to speak */
+    *uskin, /* dragon armor, if a dragon */
+    *uarmc, *uarmh,
+    *uarms, *uarmg,
+    *uarmf, *uamul,
+    *uright,
+    *uleft,
+    *ublindf,
+    *uchain,
+    *uball;
+int lastinvnr;  /* 0 ... 51 */
 
 const int shield_static[SHIELD_COUNT] = {
-    E_ss1, E_ss2, E_ss3, E_ss2, E_ss1, E_ss2, E_ss4,	/* 7 per row */
-    E_ss1, E_ss2, E_ss3, E_ss2, E_ss1, E_ss2, E_ss4,
-    E_ss1, E_ss2, E_ss3, E_ss2, E_ss1, E_ss2, E_ss4,
+                                         E_ss1, E_ss2, E_ss3, E_ss2, E_ss1, E_ss2, E_ss4,    /* 7 per row */
+                                         E_ss1, E_ss2, E_ss3, E_ss2, E_ss1, E_ss2, E_ss4,
+                                         E_ss1, E_ss2, E_ss3, E_ss2, E_ss1, E_ss2, E_ss4,
 };
 
 struct spell spl_book[MAXSPELL + 1];
@@ -146,7 +146,7 @@ char monkeyname[PL_PSIZ];
 char wolfname[PL_PSIZ];
 char crocname[PL_PSIZ];
 char ratname[PL_PSIZ];
-char preferred_pet;	/* '\0', 'c', 'd', 'e', 'n' (none) */
+char preferred_pet; /* '\0', 'c', 'd', 'e', 'n' (none) */
 /* monsters that went down/up together with @ */
 struct monst *mydogs;
 /* monsters that are moving to another dungeon level */
@@ -155,22 +155,22 @@ struct monst *migrating_mons;
 struct mvitals mvitals[NUMMONS];
 
 const char *const c_obj_colors[] = {
-	"black",		/* CLR_BLACK */
-	"red",			/* CLR_RED */
-	"green",		/* CLR_GREEN */
-	"brown",		/* CLR_BROWN */
-	"blue",			/* CLR_BLUE */
-	"magenta",		/* CLR_MAGENTA */
-	"cyan",			/* CLR_CYAN */
-	"gray",			/* CLR_GRAY */
-	"transparent",		/* no_color */
-	"orange",		/* CLR_ORANGE */
-	"bright green",		/* CLR_BRIGHT_GREEN */
-	"yellow",		/* CLR_YELLOW */
-	"bright blue",		/* CLR_BRIGHT_BLUE */
-	"bright magenta",	/* CLR_BRIGHT_MAGENTA */
-	"bright cyan",		/* CLR_BRIGHT_CYAN */
-	"white",		/* CLR_WHITE */
+                                    "black",        /* CLR_BLACK */
+                                    "red",          /* CLR_RED */
+                                    "green",        /* CLR_GREEN */
+                                    "brown",        /* CLR_BROWN */
+                                    "blue",         /* CLR_BLUE */
+                                    "magenta",      /* CLR_MAGENTA */
+                                    "cyan",         /* CLR_CYAN */
+                                    "gray",         /* CLR_GRAY */
+                                    "transparent",      /* no_color */
+                                    "orange",       /* CLR_ORANGE */
+                                    "bright green",     /* CLR_BRIGHT_GREEN */
+                                    "yellow",       /* CLR_YELLOW */
+                                    "bright blue",      /* CLR_BRIGHT_BLUE */
+                                    "bright magenta",   /* CLR_BRIGHT_MAGENTA */
+                                    "bright cyan",      /* CLR_BRIGHT_CYAN */
+                                    "white",        /* CLR_WHITE */
 };
 
 const char * const the_your[] = {"the", "your"};
@@ -178,10 +178,10 @@ const char * const the_your[] = {"the", "your"};
 /* NOTE: the order of these words exactly corresponds to the
    order of oc_material values #define'd in objclass.h. */
 const char * const materialnm[] = {
-	"mysterious", "liquid", "wax", "organic", "flesh",
-	"paper", "cloth", "leather", "wooden", "bone", "dragonhide",
-	"iron", "metal", "copper", "silver", "gold", "platinum", "mithril",
-	"plastic", "glass", "gemstone", "stone"
+                                   "mysterious", "liquid", "wax", "organic", "flesh",
+                                   "paper", "cloth", "leather", "wooden", "bone", "dragonhide",
+                                   "iron", "metal", "copper", "silver", "gold", "platinum", "mithril",
+                                   "plastic", "glass", "gemstone", "stone"
 };
 
 /* Vision */
@@ -191,7 +191,7 @@ char **viz_array;/* used in cansee() and couldsee() macros */
 char *fqn_prefix[PREFIX_COUNT] = { NULL, NULL, NULL, NULL, NULL };
 
 const char *const fqn_prefix_names[PREFIX_COUNT] = {
-    "bonesdir", "datadir", "scoredir", "lockdir", "troubledir"
+                                                    "bonesdir", "datadir", "scoredir", "lockdir", "troubledir"
 };
 
 
@@ -227,7 +227,7 @@ int curline;
 void init_data(void)
 {
     boolean in_restore = program_state.restoring;
-    
+
     /* iflags may already contain valid, important data, because init_data() runs
      * as part of the game init sequence after options have been set, etc. */
     boolean nolog = iflags.disable_log;
@@ -235,7 +235,7 @@ void init_data(void)
     struct nh_msgtype_rules *mt_rules = iflags.mt_rules;
     char *hp_notify_fmt = iflags.hp_notify_fmt;
     moves = 1;
-    
+
     memset(&program_state, 0, sizeof(program_state));
     memset(&flags, 0, sizeof(flags));
     memset(&iflags, 0, sizeof(iflags));
@@ -261,7 +261,7 @@ void init_data(void)
     memset(multi_txt, 0, sizeof(multi_txt));
     memset(toplines, 0, sizeof(toplines));
     memset(toplines_count, 0, sizeof(toplines_count));
-    
+
     level = NULL;
     multi = occtime = delay_start = killer_format = 0;
     afternmv = NULL;
@@ -272,8 +272,8 @@ void init_data(void)
     sp_levchn = NULL;
     in_mklev = stoned = unweapon = mrg_to_wielded = FALSE;
     current_wand = invent = uwep = uarm = uswapwep = uquiver = uarmu = uskin =
-	uarmc = uarmh = uarms = uarmg = uarmf = uamul = uright = uleft =
-	ublindf = uchain = uball = NULL;
+        uarmc = uarmh = uarms = uarmg = uarmf = uamul = uright = uleft =
+        ublindf = uchain = uball = NULL;
     magic_chest_objs = NULL;
     book = NULL;
     in_steed_dismounting = FALSE;
@@ -291,7 +291,7 @@ void init_data(void)
     histevents = NULL;
     histcount = 0;
     curline = 0;
-    
+
     program_state.restoring = in_restore;
     iflags.disable_log = nolog;
     iflags.ap_rules = rules;
