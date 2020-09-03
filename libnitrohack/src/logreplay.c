@@ -220,14 +220,30 @@ void replay_begin(void)
     filesize = ftell(loginfo.flog);
     fseek(loginfo.flog, 0, SEEK_SET);
 
+    /* Disable logging temporarily in anticipation for error prompts */
+    boolean old_disable = iflags.disable_log;
+    iflags.disable_log = TRUE;
     if (filesize < 24 ||
         !fscanf(loginfo.flog, "NHGAME %*4s %lx %x",
                 &loginfo.endpos, &loginfo.actioncount) ||
-        loginfo.endpos > filesize) {
+        (loginfo.endpos > filesize
+#ifdef DEBUG
+         && yn("Save file appears to have incorrect size data. Ignore?") == 'n'
+#endif
+         )) {
+        iflags.disable_log = old_disable;
         fclose(loginfo.flog);
         loginfo.flog = NULL;
         terminate();
+    } else if (loginfo.endpos > filesize) {
+        /* assume manual save editor know what they're doing... */
+        raw_printf("Save size and actual filesize differ "
+                   "(expected '%d', actual '%d'). "
+                   "Assuming endpos is actual file size.",
+                   loginfo.endpos, filesize);
+        loginfo.endpos = filesize;
     }
+    iflags.disable_log = old_disable;
 
     /* log_command_result() in log.c needs this to update the log header
      * correctly, but getting this info there The Right Way involves
