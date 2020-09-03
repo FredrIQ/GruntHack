@@ -313,9 +313,10 @@ int tactics(struct monst *mtmp)
         /* unless, of course, there are no stairs (e.g. endlevel) */
         mtmp->mavenge = 1; /* covetous monsters attack while fleeing */
         if (In_W_tower(level, mtmp->mx, mtmp->my) ||
-            (mtmp->iswiz && !level->upstair.sx && !mon_has_amulet(mtmp))) {
+            (mtmp->iswiz && !isok(level->upstair.sx, level->upstair.sy) &&
+             !mon_has_amulet(mtmp))) {
             if (!rn2(3 + mtmp->mhp/10)) rloc(level, mtmp, FALSE);
-        } else if (level->upstair.sx &&
+        } else if (isok(level->upstair.sx, level->upstair.sy) &&
                    (mtmp->mx != level->upstair.sx || mtmp->my != level->upstair.sy)) {
             mnearto(mtmp, level->upstair.sx, level->upstair.sy, TRUE);
         }
