@@ -426,10 +426,26 @@ static void flip_drawbridge_vertical(struct rm *loc)
     }
 }
 
+#define FlipX(val) do {                                 \
+        if ((flp & 2) && isok(val, miny))               \
+            val = ((maxx - (val)) - minx);              \
+    } while (0)
+#define FlipY(val) do {                                 \
+        if ((flp & 1) && isok(minx, val))               \
+            val = ((maxy - (val)) - miny);              \
+    } while (0)
+#define FlipXY(x, y) do {                       \
+        FlipX(x);                               \
+        FlipY(y);                               \
+    } while (0)
+#define FlipC(val) FlipXY(val.x, val.y)
+
 static void flip_level(struct level *lev, int flp)
 {
-    int x2 = COLNO - 1;
-    int y2 = ROWNO - 1;
+    int minx = 1;
+    int miny = 0;
+    int maxx = COLNO - 1;
+    int maxy = ROWNO - 1;
 
     int x, y, i;
 
@@ -441,225 +457,170 @@ static void flip_level(struct level *lev, int flp)
     struct engr *etmp;
     struct mkroom *sroom;
 
+    /* Nothing to do */
+    if (!(flp & 3))
+        return;
+
     /* stairs and ladders */
-    if (flp & 1) {
-        lev->upstair.sy = y2 - lev->upstair.sy;
-        lev->dnstair.sy = y2 - lev->dnstair.sy;
-        lev->upladder.sy = y2 - lev->upladder.sy;
-        lev->dnladder.sy = y2 - lev->dnladder.sy;
-    }
-    if (flp & 2) {
-        lev->upstair.sx = x2 - lev->upstair.sx + 1;
-        lev->dnstair.sx = x2 - lev->dnstair.sx + 1;
-        lev->upladder.sx = x2 - lev->upladder.sx + 1;
-        lev->dnladder.sx = x2 - lev->dnladder.sx + 1;
-    }
+    FlipXY(lev->upstair.sx, lev->upstair.sy);
+    FlipXY(lev->dnstair.sx, lev->dnstair.sy);
+    FlipXY(lev->upladder.sx, lev->upladder.sy);
+    FlipXY(lev->dnladder.sx, lev->dnladder.sy);
 
     /* traps */
     for (ttmp = lev->lev_traps; ttmp; ttmp = ttmp->ntrap) {
-        if (flp & 1) {
-            ttmp->ty = y2 - ttmp->ty;
-            if (ttmp->ttyp == ROLLING_BOULDER_TRAP) {
-                ttmp->launch.y = y2 - ttmp->launch.y;
-                ttmp->launch2.y = y2 - ttmp->launch2.y;
-            }
-        }
-        if (flp & 2) {
-            ttmp->tx = x2 - ttmp->tx + 1;
-            if (ttmp->ttyp == ROLLING_BOULDER_TRAP) {
-                ttmp->launch.x = x2 - ttmp->launch.x + 1;
-                ttmp->launch2.x = x2 - ttmp->launch2.x + 1;
-            }
+        FlipXY(ttmp->tx, ttmp->ty);
+        if (ttmp->ttyp == ROLLING_BOULDER_TRAP) {
+            FlipC(ttmp->launch);
+            FlipC(ttmp->launch2);
         }
     }
 
     /* objects */
-    for (otmp = lev->objlist; otmp; otmp = otmp->nobj) {
-        if (flp & 1)
-            otmp->oy = y2 - otmp->oy;
-        if (flp & 2)
-            otmp->ox = x2 - otmp->ox + 1;
-    }
+    for (otmp = lev->objlist; otmp; otmp = otmp->nobj)
+        FlipXY(otmp->ox, otmp->oy);
 
-    for (otmp = lev->buriedobjlist; otmp; otmp = otmp->nobj) {
-        if (flp & 1)
-            otmp->oy = y2 - otmp->oy;
-        if (flp & 2)
-            otmp->ox = x2 - otmp->ox + 1;
-    }
+    for (otmp = lev->buriedobjlist; otmp; otmp = otmp->nobj)
+        FlipXY(otmp->ox, otmp->oy);
 
     /* monsters */
     for (mtmp = lev->monlist; mtmp; mtmp = mtmp->nmon) {
-        if (flp & 1) {
-            mtmp->my = y2 - mtmp->my;
-            if (mtmp->ispriest) {
-                EPRI(mtmp)->shrpos.y = y2 - EPRI(mtmp)->shrpos.y;
-            } else if (mtmp->isshk) {
-                ESHK(mtmp)->shk.y = y2 - ESHK(mtmp)->shk.y;
-                ESHK(mtmp)->shd.y = y2 - ESHK(mtmp)->shd.y;
-            } else if (mtmp->wormno) {
-                flip_worm_segs_vertical(lev, mtmp, y2);
-            }
-        }
-        if (flp & 2) {
-            mtmp->mx = x2 - mtmp->mx + 1;
-            if (mtmp->ispriest) {
-                EPRI(mtmp)->shrpos.x = x2 - EPRI(mtmp)->shrpos.x + 1;
-            } else if (mtmp->isshk) {
-                ESHK(mtmp)->shk.x = x2 - ESHK(mtmp)->shk.x + 1;
-                ESHK(mtmp)->shd.x = x2 - ESHK(mtmp)->shd.x + 1;
-            } else if (mtmp->wormno) {
-                flip_worm_segs_horizontal(lev, mtmp, x2);
-            }
+        FlipXY(mtmp->mx, mtmp->my);
+        if (mtmp->ispriest)
+            FlipC(EPRI(mtmp)->shrpos);
+        else if (mtmp->isshk) {
+            FlipC(ESHK(mtmp)->shk);
+            FlipC(ESHK(mtmp)->shd);
+        } else if (mtmp->wormno) {
+            if (flp & 1)
+                flip_worm_segs_vertical(lev, mtmp, maxy);
+            if (flp & 2)
+                flip_worm_segs_horizontal(lev, mtmp, maxx);
         }
     }
 
     /* engravings */
-    for (etmp = lev->lev_engr; etmp; etmp = etmp->nxt_engr) {
-        if (flp & 1)
-            etmp->engr_y = y2 - etmp->engr_y;
-        if (flp & 2)
-            etmp->engr_x = x2 - etmp->engr_x + 1;
-    }
+    for (etmp = lev->lev_engr; etmp; etmp = etmp->nxt_engr)
+        FlipXY(etmp->engr_x, etmp->engr_y);
 
     /* regions */
     for (i = 0; i < num_lregions; i++) {
-        if (flp & 1) {
-            lregions[i].inarea.y1 = y2 - lregions[i].inarea.y1;
-            lregions[i].inarea.y2 = y2 - lregions[i].inarea.y2;
-            if (lregions[i].inarea.y1 > lregions[i].inarea.y2) {
-                int tmp = lregions[i].inarea.y1;
-                lregions[i].inarea.y1 = lregions[i].inarea.y2;
-                lregions[i].inarea.y2 = tmp;
-            }
+        FlipXY(lregions[i].inarea.x1, lregions[i].inarea.y1);
+        FlipXY(lregions[i].inarea.x2, lregions[i].inarea.y2);
+        FlipXY(lregions[i].delarea.x1, lregions[i].delarea.y1);
+        FlipXY(lregions[i].delarea.x2, lregions[i].delarea.y2);
 
-            lregions[i].delarea.y1 = y2 - lregions[i].delarea.y1;
-            lregions[i].delarea.y2 = y2 - lregions[i].delarea.y2;
-            if (lregions[i].delarea.y1 > lregions[i].delarea.y2) {
-                int tmp = lregions[i].delarea.y1;
-                lregions[i].delarea.y1 = lregions[i].delarea.y2;
-                lregions[i].delarea.y2 = tmp;
-            }
+        if (lregions[i].inarea.x1 > lregions[i].inarea.x2) {
+            int tmp = lregions[i].inarea.x1;
+            lregions[i].inarea.x1 = lregions[i].inarea.x2;
+            lregions[i].inarea.x2 = tmp;
         }
-        if (flp & 2) {
-            lregions[i].inarea.x1 = x2 - lregions[i].inarea.x1 + 1;
-            lregions[i].inarea.x2 = x2 - lregions[i].inarea.x2 + 1;
-            if (lregions[i].inarea.x1 > lregions[i].inarea.x2) {
-                int tmp = lregions[i].inarea.x1;
-                lregions[i].inarea.x1 = lregions[i].inarea.x2;
-                lregions[i].inarea.x2 = tmp;
-            }
-
-            lregions[i].delarea.x1 = x2 - lregions[i].delarea.x1 + 1;
-            lregions[i].delarea.x2 = x2 - lregions[i].delarea.x2 + 1;
-            if (lregions[i].delarea.x1 > lregions[i].delarea.x2) {
-                int tmp = lregions[i].delarea.x1;
-                lregions[i].delarea.x1 = lregions[i].delarea.x2;
-                lregions[i].delarea.x2 = tmp;
-            }
+        if (lregions[i].delarea.x1 > lregions[i].delarea.x2) {
+            int tmp = lregions[i].delarea.x1;
+            lregions[i].delarea.x1 = lregions[i].delarea.x2;
+            lregions[i].delarea.x2 = tmp;
+        }
+        if (lregions[i].inarea.y1 > lregions[i].inarea.y2) {
+            int tmp = lregions[i].inarea.y1;
+            lregions[i].inarea.y1 = lregions[i].inarea.y2;
+            lregions[i].inarea.y2 = tmp;
+        }
+        if (lregions[i].delarea.y1 > lregions[i].delarea.y2) {
+            int tmp = lregions[i].delarea.y1;
+            lregions[i].delarea.y1 = lregions[i].delarea.y2;
+            lregions[i].delarea.y2 = tmp;
         }
     }
 
     /* rooms */
     for (sroom = &lev->rooms[0]; ; sroom++) {
-        if (sroom->hx < 0) break;
+        if (sroom->hx < 0)
+            break;
 
-        if (flp & 1) {
-            sroom->ly = y2 - sroom->ly;
-            sroom->hy = y2 - sroom->hy;
-            if (sroom->ly > sroom->hy) {
-                int tmp = sroom->ly;
-                sroom->ly = sroom->hy;
-                sroom->hy = tmp;
-            }
+        FlipXY(sroom->lx, sroom->ly);
+        FlipXY(sroom->hx, sroom->hy);
+
+        if (sroom->lx > sroom->hx) {
+            int tmp = sroom->lx;
+            sroom->lx = sroom->hx;
+            sroom->hx = tmp;
         }
-        if (flp & 2) {
-            sroom->lx = x2 - sroom->lx + 1;
-            sroom->hx = x2 - sroom->hx + 1;
-            if (sroom->lx > sroom->hx) {
-                int tmp = sroom->lx;
-                sroom->lx = sroom->hx;
-                sroom->hx = tmp;
-            }
+        if (sroom->ly > sroom->hy) {
+            int tmp = sroom->ly;
+            sroom->ly = sroom->hy;
+            sroom->hy = tmp;
         }
 
         if (sroom->nsubrooms) {
             for (i = 0; i < sroom->nsubrooms; i++) {
                 struct mkroom *rroom = sroom->sbrooms[i];
-                if (flp & 1) {
-                    rroom->ly = y2 - rroom->ly;
-                    rroom->hy = y2 - rroom->hy;
-                    if (rroom->ly > rroom->hy) {
-                        int tmp = rroom->ly;
-                        rroom->ly = rroom->hy;
-                        rroom->hy = tmp;
-                    }
+                FlipXY(rroom->lx, rroom->ly);
+                FlipXY(rroom->hx, rroom->hy);
+                if (rroom->lx > rroom->hx) {
+                    int tmp = rroom->lx;
+                    rroom->lx = rroom->hx;
+                    rroom->hx = tmp;
                 }
-                if (flp & 2) {
-                    rroom->lx = x2 - rroom->lx + 1;
-                    rroom->hx = x2 - rroom->hx + 1;
-                    if (rroom->lx > rroom->hx) {
-                        int tmp = rroom->lx;
-                        rroom->lx = rroom->hx;
-                        rroom->hx = tmp;
-                    }
+                if (rroom->ly > rroom->hy) {
+                    int tmp = rroom->ly;
+                    rroom->ly = rroom->hy;
+                    rroom->hy = tmp;
                 }
             }
         }
     }
 
     /* doors */
-    for (i = 0; i < lev->doorindex; i++) {
-        if (flp & 1)
-            lev->doors[i].y = y2 - lev->doors[i].y;
-        if (flp & 2)
-            lev->doors[i].x = x2 - lev->doors[i].x + 1;
-    }
+    for (i = 0; i < lev->doorindex; i++)
+        FlipC(lev->doors[i]);
 
     /* the map */
     if (flp & 1) {
-        for (x = 1; x <= x2; x++) {
-            for (y = 0; y <= (y2 / 2); y++) {
+        for (x = 1; x <= maxx; x++) {
+            for (y = 0; y <= (maxy / 2); y++) {
                 flip_drawbridge_vertical(&lev->locations[x][y]);
-                flip_drawbridge_vertical(&lev->locations[x][y2-y]);
+                flip_drawbridge_vertical(&lev->locations[x][maxy-y]);
 
                 trm = lev->locations[x][y];
-                lev->locations[x][y] = lev->locations[x][y2-y];
-                lev->locations[x][y2-y] = trm;
+                lev->locations[x][y] = lev->locations[x][maxy-y];
+                lev->locations[x][maxy-y] = trm;
 
                 otmp = lev->objects[x][y];
-                lev->objects[x][y] = lev->objects[x][y2-y];
-                lev->objects[x][y2-y] = otmp;
+                lev->objects[x][y] = lev->objects[x][maxy-y];
+                lev->objects[x][maxy-y] = otmp;
 
                 mtmp = lev->monsters[x][y];
-                lev->monsters[x][y] = lev->monsters[x][y2-y];
-                lev->monsters[x][y2-y] = mtmp;
+                lev->monsters[x][y] = lev->monsters[x][maxy-y];
+                lev->monsters[x][maxy-y] = mtmp;
             }
         }
     }
     if (flp & 2) {
-        for (x = 1; x <= (x2 / 2); x++) {
-            for (y = 0; y <= y2; y++) {
+        for (x = 1; x <= (maxx / 2); x++) {
+            for (y = 0; y <= maxy; y++) {
                 flip_drawbridge_horizontal(&lev->locations[x][y]);
-                flip_drawbridge_horizontal(&lev->locations[x2-x+1][y]);
+                flip_drawbridge_horizontal(&lev->locations[maxx-x+1][y]);
 
                 trm = lev->locations[x][y];
-                lev->locations[x][y] = lev->locations[x2-x+1][y];
-                lev->locations[x2-x+1][y] = trm;
+                lev->locations[x][y] = lev->locations[maxx-x+1][y];
+                lev->locations[maxx-x+1][y] = trm;
 
                 otmp = lev->objects[x][y];
-                lev->objects[x][y] = lev->objects[x2-x+1][y];
-                lev->objects[x2-x+1][y] = otmp;
+                lev->objects[x][y] = lev->objects[maxx-x+1][y];
+                lev->objects[maxx-x+1][y] = otmp;
 
                 mtmp = lev->monsters[x][y];
-                lev->monsters[x][y] = lev->monsters[x2-x+1][y];
-                lev->monsters[x2-x+1][y] = mtmp;
+                lev->monsters[x][y] = lev->monsters[maxx-x+1][y];
+                lev->monsters[maxx-x+1][y] = mtmp;
             }
         }
     }
-
-    wall_extends(lev, 1, 0, COLNO - 1, ROWNO - 1);
 }
+
+#undef FlipC
+#undef FlipXY
+#undef FlipY
+#undef FlipX
 
 static void flip_level_rnd(struct level *lev, int flp)
 {
