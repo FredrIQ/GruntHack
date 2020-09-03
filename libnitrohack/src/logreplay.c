@@ -1013,7 +1013,6 @@ static void replay_check_diff(char *token, boolean optonly, boolean fast)
 
         if (fast || diff_base.pos != mf.pos ||
             memcmp(diff_base.buf, mf.buf, mf.pos)) {
-#ifdef DEBUG /* desync location debugging */
             if (!fast && mf.pos == diff_base.pos && !loginfo.cmds_are_invalid) {
                 int i;
                 struct memfile_tag origtag;
@@ -1031,17 +1030,18 @@ static void replay_check_diff(char *token, boolean optonly, boolean fast)
                                     best_tag = tp;
                             }
                         }
-                        raw_printf("desync between recording and save at tag "
-                                   "(%d, %ld) + %d bytes", (int)best_tag->tagtype,
-                                   best_tag->tagdata, dbpos - best_tag->pos);
-                        break; /* comment this out to see all desyncs */
+                        raw_printf("desync between recording and save at "
+                                   "dbpos %d, tag (%d, %ld) + %d bytes "
+                                   "('%x' vs '%x')", dbpos, (int)best_tag->tagtype,
+                                   best_tag->tagdata, dbpos - best_tag->pos,
+                                   mf.buf[dbpos], diff_base.buf[dbpos]);
+                        //break; /* comment this out to see all desyncs */
                     }
                 }
             } else if (!fast && !loginfo.cmds_are_invalid) {
                 raw_printf("desync between recording (length %d) and "
                            "recorded save (length %d)", diff_base.pos, mf.pos);
             }
-#endif
             loginfo.out_of_sync = TRUE;
             mfree(&diff_base);
             diff_base = mf;
